@@ -1,2 +1,6 @@
-# -Project.LP_20-21
-Solver of kakuro puzzles in Prolog.
+# Kakuro Solver
+LP Project (20-21) @ IST
+
+Language: Prolog
+
+GRADE: NG/20
