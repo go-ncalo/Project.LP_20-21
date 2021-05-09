@@ -26,52 +26,32 @@ permutacoes_soma(N, Els, Soma, Perms) :-
         Unsorted_Perms),
     sort(Unsorted_Perms, Perms).
 
+getS(H_V, P, S) :- H_V \== h -> nth0(0, P, S); nth0(1, P, S).
+
 % estrutura espaco
 cria_espaco(S, Lst, espaco(S, Lst)).
 get_Lst(espaco(_, Lst), Lst).
 change_lst(Lst, espaco(S, _), espaco(S, Lst)).
 
-espaco_fila_aux_h([], Esp, Esp, _).
+espaco_fila_aux([], Esp, Esp, _, _).
 
-espaco_fila_aux_h([P | Q], Esp, Lst_Esp, _) :-
+espaco_fila_aux([P | Q], Esp, Lst_Esp, _, H_V) :-
     is_list(P),
     !,
-    nth0(1, P, S),
+    getS(H_V, P, S),
     cria_espaco(S, [], Esp_aux),
-    espaco_fila_aux_h(Q, Esp, [Esp_aux | Lst_Esp], []).
+    espaco_fila_aux(Q, Esp, [Esp_aux | Lst_Esp], [], H_V).
 
-espaco_fila_aux_h([P | Q], Esp, [Esp_at | Resto], Lst) :-
+espaco_fila_aux([P | Q], Esp, [Esp_at | Resto], Lst, H_V) :-
     append(Lst, [P], Lst_aux),
     change_lst(Lst_aux, Esp_at, Esp_no),
-    espaco_fila_aux_h(Q, Esp, [Esp_no | Resto], Lst_aux).
+    espaco_fila_aux(Q, Esp, [Esp_no | Resto], Lst_aux, H_V).
 
 espaco_fila(Fila, Esp, H_V) :-
-    H_V = h,
-    !,
-    espaco_fila_aux_h(Fila, Esp_aux, [], []),
+    espaco_fila_aux(Fila, Esp_aux, [], [], H_V),
     reverse(Esp_aux, Esp_list),
     bagof(Esp, (member(Esp, Esp_list), get_Lst(Esp, Lst), Lst \== []), Esp_lst),
     member(Esp, Esp_lst).
-
-espaco_fila(Fila, Esp, _) :-
-    espaco_fila_aux_v(Fila, Esp_aux, [], []),
-    reverse(Esp_aux, Esp_list),
-    bagof(Esps, (member(Esps, Esp_list), get_Lst(Esps, Lst), Lst \== []), Esp_lst),
-    member(Esp, Esp_lst).
-
-espaco_fila_aux_v([], Esp, Esp, _).
-
-espaco_fila_aux_v([P | Q], Esp, Lst_Esp, _) :-
-    is_list(P),
-    !,
-    nth0(0, P, S),
-    cria_espaco(S, [], Esp_aux),
-    espaco_fila_aux_v(Q, Esp, [Esp_aux | Lst_Esp], []).
-
-espaco_fila_aux_v([P | Q], Esp, [Esp_at | Resto], Lst) :-
-    append(Lst, [P], Lst_aux),
-    change_lst(Lst_aux, Esp_at, Esp_no),
-    espaco_fila_aux_v(Q, Esp, [Esp_no | Resto], Lst_aux).
 
 % espacos_fila(H_V, Fila, Espacos)
 espacos_fila(_, Fila, Espacos) :-
