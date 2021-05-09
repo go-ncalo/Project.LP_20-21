@@ -27,6 +27,10 @@ permutacoes_soma(N, Els, Soma, Perms) :-
     sort(Unsorted_Perms, Perms).
 
 % estrutura espaco
+cria_espaco(S, Lst, espaco(S, Lst)).
+get_Lst(espaco(_, Lst), Lst).
+change_lst(Lst, espaco(S, _), espaco(S, Lst)).
+
 espaco_fila_aux_h([], Esp, Esp, _).
 
 espaco_fila_aux_h([P | Q], Esp, Lst_Esp, _) :-
@@ -69,14 +73,30 @@ espaco_fila_aux_v([P | Q], Esp, [Esp_at | Resto], Lst) :-
     change_lst(Lst_aux, Esp_at, Esp_no),
     espaco_fila_aux_v(Q, Esp, [Esp_no | Resto], Lst_aux).
 
-cria_espaco(S, Lst, espaco(S, Lst)).
-get_Lst(espaco(_, Lst), Lst).
-change_lst(Lst, espaco(S, _), espaco(S, Lst)).
-
 % espacos_fila(H_V, Fila, Espacos)
+espacos_fila(_, Fila, Espacos) :-
+    exclude(is_list, Fila, Lst),
+    Lst = [],
+    !,
+    Espacos = Lst.
+
 espacos_fila(H_V, Fila, Espacos) :-
     bagof(Esp, espaco_fila(Fila, Esp, H_V), Espacos).
+
 % espacos_puzzle(Puzzle, Espacos)
+espacos_puzzle(Puzzle, Espacos) :-
+    espacos_puzzle_aux(Puzzle, Espacos_h, [], h),
+    mat_transposta(Puzzle, Puz_Tr),
+    espacos_puzzle_aux(Puz_Tr, Espacos_v, [], v),
+    append(Espacos_h, Espacos_v, Espacos).
+
+espacos_puzzle_aux([], Espacos, Espacos, _).
+
+espacos_puzzle_aux([Fila | Resto], Espacos, Lst_Esp_Aux, H_V) :-
+    espacos_fila(H_V, Fila, Esps),
+    append(Lst_Esp_Aux, Esps, Lst_Esp),
+    espacos_puzzle_aux(Resto, Espacos, Lst_Esp, H_V).
+
 % espacos_com_posicoes_comuns(Espacos, Esp, Esps_com)
 % permutacoes_soma_espacos(Espacos, Perms_soma)
 % permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma)
