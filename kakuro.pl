@@ -78,6 +78,19 @@ espacos_puzzle_aux([Fila | Resto], Espacos, Lst_Esp_Aux, H_V) :-
     espacos_puzzle_aux(Resto, Espacos, Lst_Esp, H_V).
 
 % espacos_com_posicoes_comuns(Espacos, Esp, Esps_com)
+espacos_com_posicoes_comuns(Espacos, Esp, Esps_com) :-
+    bagof(Esps, 
+    espacos_com_posicoes_comuns_aux(Espacos, Esp, Esps), 
+    Esps_com).
+
+espacos_com_posicoes_comuns_aux(Espacos, Esp, Esps) :-
+    get_Lst(Esp, Lst),
+    member(Esps, Espacos),
+    get_Lst(Esps, Lst1),
+    member(X, Lst),
+    member(X2, Lst1),
+    X == X2,
+    Esp \== Esps.
 % permutacoes_soma_espacos(Espacos, Perms_soma)
 % permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma)
 % permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, Perms_poss)
