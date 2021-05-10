@@ -31,6 +31,7 @@ getS(H_V, P, S) :- H_V \== h -> nth0(0, P, S); nth0(1, P, S).
 % estrutura espaco
 cria_espaco(S, Lst, espaco(S, Lst)).
 get_Lst(espaco(_, Lst), Lst).
+get_S(espaco(S, _), S).
 change_lst(Lst, espaco(S, _), espaco(S, Lst)).
 
 espaco_fila_aux([], Esp, Esp, _, _).
@@ -47,10 +48,13 @@ espaco_fila_aux([P | Q], Esp, [Esp_at | Resto], Lst, H_V) :-
     change_lst(Lst_aux, Esp_at, Esp_no),
     espaco_fila_aux(Q, Esp, [Esp_no | Resto], Lst_aux, H_V).
 
+% espaco_fila(Fila, Esp, H_V)
 espaco_fila(Fila, Esp, H_V) :-
     espaco_fila_aux(Fila, Esp_aux, [], [], H_V),
     reverse(Esp_aux, Esp_list),
-    bagof(Esp, (member(Esp, Esp_list), get_Lst(Esp, Lst), Lst \== []), Esp_lst),
+    bagof(Esp, 
+    (member(Esp, Esp_list), get_Lst(Esp, Lst), Lst \== []),
+    Esp_lst),
     member(Esp, Esp_lst).
 
 % espacos_fila(H_V, Fila, Espacos)
@@ -91,7 +95,20 @@ espacos_com_posicoes_comuns_aux(Espacos, Esp, Esps) :-
     member(X2, Lst1),
     X == X2,
     Esp \== Esps.
+
 % permutacoes_soma_espacos(Espacos, Perms_soma)
+permutacoes_soma_espacos(Espacos, Perms_soma) :-
+    bagof([Esp, Perms], 
+    permutacoes_soma_espacos_aux(Espacos, Esp, Perms), 
+    Perms_soma).
+    
+permutacoes_soma_espacos_aux(Espacos, Esp, Perms) :-
+    member(Esp, Espacos),
+    get_S(Esp, S),
+    get_Lst(Esp, Lst),
+    length(Lst, Len),
+    permutacoes_soma(Len, [1, 2, 3, 4, 5, 6, 7, 8, 9], S, Perms).
+
 % permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma)
 % permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, Perms_poss)
 % permutacoes_possiveis_espacos(Espacos, Perms_poss_esps)
