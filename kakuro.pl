@@ -101,7 +101,6 @@ permutacoes_soma_espacos(Espacos, Perms_soma) :-
     bagof([Esp, Perms], 
     permutacoes_soma_espacos_aux(Espacos, Esp, Perms), 
     Perms_soma).
-    
 permutacoes_soma_espacos_aux(Espacos, Esp, Perms) :-
     member(Esp, Espacos),
     get_S(Esp, S),
@@ -110,9 +109,57 @@ permutacoes_soma_espacos_aux(Espacos, Esp, Perms) :-
     permutacoes_soma(Len, [1, 2, 3, 4, 5, 6, 7, 8, 9], S, Perms).
 
 % permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma)
+permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma) :-
+    % arranjar permutacoes para Esp
+    permutacao_espaco(Esp, Perms_soma, Perm_Esp),
+    % espacos que tem posicoes em comum com Esp
+    espacos_com_posicoes_comuns(Espacos, Esp, Esp_Com),
+    % lista das permutacoes dos espacos em comum
+    bagof(Lst, permutacao_espaco_comum(Esp_Com, Perms_soma, Lst), Perm_Esp_Comum),
+    member(Esp_Lst, Perm_Esp),
+    recursao(Esp_Lst, Perm_Esp_Comum, Res, []),
+    Res == Esp_Lst,
+    Perm = Res.
+
+permutacao_espaco_comum(Esp_Com, Perms_soma, Lst) :-
+    member(X, Perms_soma), 
+    member(X2, X), 
+    member(X3, Esp_Com), 
+    X2 == X3,
+    nextto(X2, Lst, X).
+
+permutacao_espaco(Esp, Perms_soma, Perm_Esp) :-
+    bagof(Y, (member(Y, Perms_soma), member(Y2, Y), Y2 == Esp), Lst1),
+    append(Lst1, Lst),
+    nth0(1, Lst, Perm_Esp).
+
+recursao([], [], Res, Res).
+
+recursao([Num | Resto], [Perms | Resto2], Res, Lst) :-
+    (member(Lst_Perms, Perms),
+    member(Num, Lst_Perms)),
+    append(Lst, [Num], Lst1),
+    !,
+    recursao(Resto, Resto2, Res, Lst1).
+
 % permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, Perms_poss)
+permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, Perms_poss) :-
+    get_Lst(Esp, Lst),
+    append([], [Lst], Res),
+    bagof(Perm, permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma), Unsorted_Perm),
+    sort(Unsorted_Perm, Sorted_Perm),
+    append(Res, [Sorted_Perm], Perms_poss).
+
 % permutacoes_possiveis_espacos(Espacos, Perms_poss_esps)
-% numeros_comuns(Lst_Perms, Numeros_comuns)
+permutacoes_possiveis_espacos(Espacos, Perms_poss_esps) :-
+    permutacoes_soma_espacos(Espacos, Perms_soma),
+    bagof(Perms_poss,permutacoes_possiveis_espacos_aux(Espacos, Perms_soma, Perms_poss), Perms_poss_esps).
+
+permutacoes_possiveis_espacos_aux(Espacos, Perms_soma, Perms_poss) :-
+    member(Esp, Espacos), 
+    permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, Perms_poss).
+
+% numeros_comuns(Lst_Perms, Numeros_comuns
 % atribui_comuns(Perms_Possiveis)
 % retira_impossiveis(Perms_Possiveis, Novas_Perms_Possiveis)
 % simplifica(Perms_Possiveis, Novas_Perms_Possiveis)
