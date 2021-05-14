@@ -159,7 +159,7 @@ permutacoes_possiveis_espacos_aux(Espacos, Perms_soma, Perms_poss) :-
     member(Esp, Espacos), 
     permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, Perms_poss).
 
-% numeros_comuns(Lst_Perms, Numeros_comuns
+% numeros_comuns(Lst_Perms, Numeros_comuns)
 % atribui_comuns(Perms_Possiveis)
 % retira_impossiveis(Perms_Possiveis, Novas_Perms_Possiveis)
 % simplifica(Perms_Possiveis, Novas_Perms_Possiveis)
@@ -169,6 +169,25 @@ permutacoes_possiveis_espacos_aux(Espacos, Perms_soma, Perms_poss) :-
 % = Resolucao de listas de permutacoes possiveis =
 % ================================================
 % escolhe_menos_alternativas(Perms_Possiveis, Escolha)
+escolhe_menos_alternativas(Perms_Possiveis, Escolha) :-
+    findall(Perm, (member(Perm, Perms_Possiveis), nth0(1, Perm, Lst), length(Lst, Tam), Tam \== 1), X),
+    X \== [],
+    !,
+    escolhe_menos_alternativas_aux(Perms_Possiveis, Escolha, 9, _).
+
+escolhe_menos_alternativas_aux([], Escolha, _, Escolha).
+
+escolhe_menos_alternativas_aux([Perm | Resto], Escolha, Max, _) :-
+    nth0(1, Perm, Lst),
+    length(Lst, Tam),
+    Tam \== 1,
+    Tam < Max,
+    !,
+    escolhe_menos_alternativas_aux(Resto, Escolha, Tam, Perm).
+
+escolhe_menos_alternativas_aux([_ | Resto], Escolha, Tam, Perm) :-
+    escolhe_menos_alternativas_aux(Resto, Escolha, Tam, Perm).
+
 % experimenta_perm(Escolha, Perms_Possiveis,Novas_Perms_Possiveis)
 % resolve_aux(Perms_Possiveis, Novas_Perms_Possiveis)
 
