@@ -1,5 +1,4 @@
 % Goncalo Mateus, 99225
-% working_directory(_, 'c:/Users/gonca/OneDrive/Ambiente de Trabalho/uni/LP/Projeto/Project.LP_20-21').
 
 :- [codigo_comum].
 
@@ -160,6 +159,24 @@ permutacoes_possiveis_espacos_aux(Espacos, Perms_soma, Perms_poss) :-
     permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, Perms_poss).
 
 % numeros_comuns(Lst_Perms, Numeros_comuns)
+numeros_comuns(Lst_Perms, Numeros_comuns) :-
+    mat_transposta(Lst_Perms, Transp_Lst),
+    numeros_comuns_aux(Transp_Lst, 1, Numeros_comuns, []).
+
+numeros_comuns_aux([], _, Numeros_comuns, Numeros_comuns).
+
+numeros_comuns_aux([Lst | Resto], Index, Numeros_comuns, Lst1) :-
+    list_to_set(Lst, [_]),
+    !,
+    nth0(0, Lst, Num),
+    append(Lst1, [(Index, Num)], Res),
+    Index_1 is Index + 1,
+    numeros_comuns_aux(Resto, Index_1, Numeros_comuns, Res).
+
+numeros_comuns_aux([_ | Resto], Index, Numeros_comuns, Res) :-
+    Index_1 is Index + 1,
+    numeros_comuns_aux(Resto, Index_1, Numeros_comuns, Res).
+
 % atribui_comuns(Perms_Possiveis)
 % retira_impossiveis(Perms_Possiveis, Novas_Perms_Possiveis)
 % simplifica(Perms_Possiveis, Novas_Perms_Possiveis)
@@ -170,6 +187,8 @@ permutacoes_possiveis_espacos_aux(Espacos, Perms_soma, Perms_poss) :-
 % ================================================
 % escolhe_menos_alternativas(Perms_Possiveis, Escolha)
 escolhe_menos_alternativas(Perms_Possiveis, Escolha) :-
+    % verifica se em todos os espacos em Perms_Possiveis estao associadas
+    % listas de permutacoes unitarias.
     findall(Perm, (member(Perm, Perms_Possiveis), nth0(1, Perm, Lst), length(Lst, Tam), Tam \== 1), X),
     X \== [],
     !,
