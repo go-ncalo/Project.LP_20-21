@@ -166,7 +166,8 @@ numeros_comuns(Lst_Perms, Numeros_comuns) :-
 numeros_comuns_aux([], _, Numeros_comuns, Numeros_comuns).
 
 numeros_comuns_aux([Lst | Resto], Index, Numeros_comuns, Lst1) :-
-    list_to_set(Lst, [_]),
+    reverse(Lst, Lst_Invert),
+    Lst = Lst_Invert,
     !,
     nth0(0, Lst, Num),
     append(Lst1, [(Index, Num)], Res),
@@ -178,8 +179,36 @@ numeros_comuns_aux([_ | Resto], Index, Numeros_comuns, Res) :-
     numeros_comuns_aux(Resto, Index_1, Numeros_comuns, Res).
 
 % atribui_comuns(Perms_Possiveis)
+atribui_comuns(Perms_Possiveis) :-
+    maplist(atribui_comuns_aux, Perms_Possiveis).
+
+atribui_comuns_aux(Lst) :-
+    nth0(0, Lst, Esp),
+    nth0(1, Lst, Perms),
+    numeros_comuns(Perms, Numeros_comuns),
+    Numeros_comuns \== [],
+    !,
+    maplist(funcao(Esp), Numeros_comuns).
+
+atribui_comuns_aux(_) :-
+    !.
+
+funcao(Esp, Lst) :-
+    Lst = (Pos, Num),
+    nth1(Pos, Esp, Var),
+    Var = Num.
+
 % retira_impossiveis(Perms_Possiveis, Novas_Perms_Possiveis)
+retira_impossiveis(Perms_Possiveis, Novas_Perms_Possiveis) :-
+    bagof([Esp, Lst_Perm], retira_impossiveis_aux(Perms_Possiveis, Esp, Lst_Perm), Novas_Perms_Possiveis).
+
+retira_impossiveis_aux(Perms_Possiveis, Esp, Lst_Perm) :-
+    member(Perms, Perms_Possiveis),
+    nth0(0, Perms, Esp),
+    nth0(1, Perms, Lst_Perms),
+    bagof(Perm, (member(Perm, Lst_Perms), subsumes_term(Esp, Perm)), Lst_Perm).
 % simplifica(Perms_Possiveis, Novas_Perms_Possiveis)
+
 % inicializa(Puzzle, Perms_Possiveis)
 
 % ================================================
@@ -215,7 +244,6 @@ experimenta_perm(Escolha, Perms_Possiveis, Novas_Perms_Possiveis) :-
     Esp = Perm,
     select(Escolha, Perms_Possiveis, [Esp, [Perm]], Novas_Perms_Possiveis),
     !.
-    
 
 % resolve_aux(Perms_Possiveis, Novas_Perms_Possiveis)
 
