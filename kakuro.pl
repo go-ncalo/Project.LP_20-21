@@ -208,6 +208,15 @@ escolhe_menos_alternativas_aux([_ | Resto], Escolha, Tam, Perm) :-
     escolhe_menos_alternativas_aux(Resto, Escolha, Tam, Perm).
 
 % experimenta_perm(Escolha, Perms_Possiveis,Novas_Perms_Possiveis)
+experimenta_perm(Escolha, Perms_Possiveis, Novas_Perms_Possiveis) :-
+    nth0(0, Escolha, Esp),
+    nth0(1, Escolha, Lst_Perms),
+    member(Perm, Lst_Perms),
+    Esp = Perm,
+    select(Escolha, Perms_Possiveis, [Esp, [Perm]], Novas_Perms_Possiveis),
+    !.
+    
+
 % resolve_aux(Perms_Possiveis, Novas_Perms_Possiveis)
 
 % ================================================
