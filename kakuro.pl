@@ -299,7 +299,7 @@ numeros_comuns(Lst_Perms, Numeros_comuns) :-
 numeros_comuns_aux([], _, Numeros_comuns, Numeros_comuns).
 
 numeros_comuns_aux([Lst | Resto], Pos, Numeros_comuns, Lst_aux) :-
-    % se uma lista for igual a sim mesma inversa, entao significa
+    % se uma lista for igual a si mesma inversa, entao significa
     % que todos os elementos da lista sao iguais e entao estamos
     % perante um par
     reverse(Lst, Lst_Invert),
@@ -356,24 +356,24 @@ altera_comuns(Esp, Lst) :-
 % impossiveis de Perms_Possiveis.
 % 
 % retira_impossiveis_aux(Perms_Possiveis, Esp, Lst_Perm)
-% Predicado auxiliar para retira_impossiveis com as condicoes
-% necessarias para o bagof.
+% Predicado auxiliar para retira_impossiveis que verifica,
+% recursivamente quais as Perms que unificam com o Esp alterado,
+% removendo as que nao o unificam.
 % -------------------------------------------------------------------
 retira_impossiveis(Perms_Possiveis, Novas_Perms_Possiveis) :-
-    bagof([Esp, Lst_Perm],
-    retira_impossiveis_aux(Perms_Possiveis, Esp, Lst_Perm),
-    Novas_Perms_Possiveis).
+    retira_impossiveis_aux(Perms_Possiveis, [], Novas_Perms_Possiveis).
 
-retira_impossiveis_aux(Perms_Possiveis, Esp, Lst_Perm) :-
-    member(Perms, Perms_Possiveis),
+retira_impossiveis_aux([], Novas_Perms_Possiveis, Novas_Perms_Possiveis).
+retira_impossiveis_aux([Perms | Resto], Lst, Novas_Perms_Possiveis) :-
     nth0(0, Perms, Esp),
-    nth0(1, Perms, Lst_Perms),
-    % verifica todas as permutacoes que unificam com o espaco,
-    % retirando assim as que nao unificam
-    bagof(Perm,
-    (member(Perm, Lst_Perms), subsumes_term(Esp, Perm)),
-    Lst_Perm).
-
+    nth0(1, Perms, Lst_Perm),
+    % Encontrar todas as Perms que unificam com o espaco, eliminando
+    % assim as que nao unificam
+    findall(Perm, (member(Perm, Lst_Perm), Esp = Perm), Lst_Perm_At),
+    Esp_At = [Esp, Lst_Perm_At],
+    append(Lst, [Esp_At], Res),
+    retira_impossiveis_aux(Resto, Res, Novas_Perms_Possiveis).
+    
 % -------------------------------------------------------------------
 % simplifica(Perms_Possiveis, Novas_Perms_Possiveis)
 % Perms_Possiveis e uma lista de permutacoes possiveis. 
@@ -382,8 +382,8 @@ retira_impossiveis_aux(Perms_Possiveis, Esp, Lst_Perm) :-
 simplifica(Perms_Possiveis, Novas_Perms_Possiveis) :-
     atribui_comuns(Perms_Possiveis),
     retira_impossiveis(Perms_Possiveis, Novas_Perms),
-    % Continua a simplificar as Perms_Possiveis enquanto as
-    % Perms_Possiveis forem diferentes das Novas_Perms
+    % Continua a simplificar as Perms_Possiveis enquanto forem
+    % diferentes das Novas_Perms
     Perms_Possiveis \== Novas_Perms,
     !,
     simplifica(Novas_Perms, Novas_Perms_Possiveis).
@@ -411,7 +411,7 @@ inicializa(Puzzle, Perms_Possiveis) :-
 % Perms_Possiveis e uma lista de permutacoes possiveis, significa que
 % Escolha e o elemento de Perms_Possiveis.
 %
-% escolhe_menos_alternativas_aux(Perms_Possiveis, Escolha, Max, Perm)
+% escolhe_menos_alternativas_aux(Perms_Possiveis, Escolha, Tam, Perm)
 % Predicado auxiliar para escolhe_menos_alternativas_aux que,
 % recursivamente, e retorna a escolha com menos permutacoes.
 % -------------------------------------------------------------------
@@ -423,8 +423,8 @@ escolhe_menos_alternativas(Perms_Possiveis, Escolha) :-
     length(Lst, Tam), Tam \== 1), X),
     X \== [],
     !,
-    % escolhi um numero arbitrariamente grande para o maximo
-    escolhe_menos_alternativas_aux(Perms_Possiveis, Escolha, 100, _).
+    % escolhi um numero arbitrariamente grande
+    escolhe_menos_alternativas_aux(Perms_Possiveis, Escolha, 10000, _).
 
 escolhe_menos_alternativas_aux([], Escolha, _, Escolha).
 
@@ -460,6 +460,9 @@ experimenta_perm(Escolha, Perms_Possiveis, Novas_Perms_Possiveis) :-
 
 resolve_aux(Perms_Possiveis, Novas_Perms_Possiveis) :-
     escolhe_menos_alternativas(Perms_Possiveis, Escolha),
+    % Se escolhe_menos_alternativas retornar False, o que significa
+    % que as listas de permutacoes de todos os espacos sao unitarias,
+    % o ciclo acaba
     !,
     experimenta_perm(Escolha, Perms_Possiveis, Novas_Perms),
     simplifica(Novas_Perms, Novas_Perms_Possiveis_1),
